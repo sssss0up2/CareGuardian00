@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>욕창 관리</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f2f2f6;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0 70px;
+        }
+        .container {
+            flex-grow: 1;
+            width: 100%;
+            max-width: 414px;
+            margin: 0 auto;
+            background-color: #f2f2f6;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .header {
+            margin-bottom: 20px;
+            justify-content: space-between;
+            perspective: 1000px;
+            cursor: pointer;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: opacity 0.3s ease-out;
+        }
+        .header-content {
+            width: 100%;
+            height: 250px;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        .header.flipped .header-content {
+            transform: rotateY(180deg);
+        }
+        .header-front, .header-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            border-radius: 15px;
+        }
+        .header-front {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        .header-back {
+            background-color: white;
+            color: #333;
+            transform: rotateY(180deg);
+        }
+        .header h2 {
+            font-size: 22px;
+            margin-bottom: 5px;
+            margin-top: 5px;
+        }
+        .header .risk-count {
+            font-size: 48px;
+            font-weight: bold;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        .header .risk-list {
+            font-size: 16px;
+            opacity: 0.9;
+            text-align: center;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        .header .risk-comparison {
+            font-size: 14px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+        .content-section {
+            background-color: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .content-section h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .wound-image {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+        .education-content {
+            margin-top: 20px;
+        }
+        .education-item {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .education-item h3 {
+            font-size: 18px;
+            color: #4facfe;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .education-item h3 i {
+            margin-right: 10px;
+        }
+        .education-item p, .education-item ul {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+        .education-item ul {
+            padding-left: 20px;
+        }
+        .education-item li {
+            margin-bottom: 5px;
+        }
+        .education-item strong {
+            color: #333;
+        }
+        .additional-content {
+            display: flex;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .additional-content::-webkit-scrollbar {
+            display: none;
+        }
+        .content-card {
+            flex: 0 0 auto;
+            width: 200px;
+            height: 200px;
+            background-color: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-right: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+        .content-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        .content-card-text {
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        .content-card h3 {
+            font-size: 14px;
+            color: #4facfe;
+            margin-bottom: 5px;
+        }
+        .content-card p {
+            font-size: 12px;
+            color: #555;
+        }
+        .close-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background-color: #4facfe;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .close-button:hover {
+            transform: translateX(-50%) scale(1.1);
+        }
+        .header-back .diagram {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+        .header-back .factor {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: rgb(255, 255, 255);
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header-back .factor i {
+            margin-bottom: 5px;
+        }
+        .header-back #malnutrition { 
+            font-size: 16px;
+            width: 100px;
+            height: 100px;
+            background-color: rgb(255, 217, 61, 0.7);
+            top: 10px;
+            left: 10px;
+  	    box-shadow: 
+        	0 2px 4px rgba(0, 0, 0, 0.07), 
+        	0 4px 8px rgba(0, 0, 0, 0.07),
+        	0 8px 16px rgba(0, 0, 0, 0.07),
+        	0 16px 32px rgba(0, 0, 0, 0.07),
+        	0 32px 64px rgba(0, 0, 0, 0.07);
+        }
+        .header-back #malnutrition i { font-size: 30px; }
+        .header-back #immobility { 
+            font-size: 20px;
+            width: 120px;
+            height: 120px;
+            background-color: rgb(255, 107, 107, 0.8);
+	    transform: translate(125px, 50px);
+  	    box-shadow: 
+        	0 2px 4px rgba(0, 0, 0, 0.07), 
+        	0 4px 8px rgba(0, 0, 0, 0.07),
+        	0 8px 16px rgba(0, 0, 0, 0.07),
+        	0 16px 32px rgba(0, 0, 0, 0.07),
+        	0 32px 64px rgba(0, 0, 0, 0.07);
+        }
+        .header-back #immobility i { font-size: 36px; }
+        .header-back #moisture { 
+            font-size: 14px;
+            width: 90px;
+            height: 90px;
+            background-color: rgb(107, 203, 119, 0.7);
+	    transform: translate(70px, 120px);
+  	    box-shadow: 
+        	0 2px 4px rgba(0, 0, 0, 0.07), 
+        	0 4px 8px rgba(0, 0, 0, 0.07),
+        	0 8px 16px rgba(0, 0, 0, 0.07),
+        	0 16px 32px rgba(0, 0, 0, 0.07),
+        	0 32px 64px rgba(0, 0, 0, 0.07);
+        }
+        .header-back #moisture i { font-size: 28px; }
+        .header-back #friction { 
+            font-size: 12px;
+            width: 80px;
+            height: 80px;
+            background-color: rgb(155, 89, 182, 0.7);
+            bottom: 10px;
+            right: 10px;
+  	    box-shadow: 
+        	0 2px 4px rgba(0, 0, 0, 0.07), 
+        	0 4px 8px rgba(0, 0, 0, 0.07),
+        	0 8px 16px rgba(0, 0, 0, 0.07),
+        	0 16px 32px rgba(0, 0, 0, 0.07),
+        	0 32px 64px rgba(0, 0, 0, 0.07);
+        }
+        .header-back #friction i { font-size: 24px; }
+        .header-back #sensory-loss { 
+            font-size: 10px;
+            width: 70px;
+            height: 70px;
+            background-color: rgb(79, 195, 247, 0.7);
+	    transform: translate(250px, 20px);
+  	    box-shadow: 
+        	0 2px 4px rgba(0, 0, 0, 0.07), 
+        	0 4px 8px rgba(0, 0, 0, 0.07),
+        	0 8px 16px rgba(0, 0, 0, 0.07),
+        	0 16px 32px rgba(0, 0, 0, 0.07),
+        	0 32px 64px rgba(0, 0, 0, 0.07);
+        }
+        .header-back #sensory-loss i { font-size: 20px; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header" id="header" onclick="flipHeader()">
+            <div class="header-content">
+                <div class="header-front">
+                    <h2>김환자님의 위험요인</h2>
+                    <div class="risk-count">5개</div>
+                    <div class="risk-list">부동, 영양불량, 습도, 마찰력, 감각 저하</div>
+                    <div class="risk-comparison">당신의 위험요인은 평균보다 2.1개 많습니다.</div>
+                </div>
+                <div class="header-back">
+                    <div class="diagram">
+                        <div id="immobility" class="factor">
+                            <i class="fas fa-bed"></i>
+                            부동
+                        </div>
+                        <div id="malnutrition" class="factor">
+                            <i class="fas fa-utensils"></i>
+                            영양불량
+                        </div>
+                        <div id="moisture" class="factor">
+                            <i class="fas fa-tint"></i>
+                            습도
+                        </div>
+                        <div id="friction" class="factor">
+                            <i class="fas fa-hands"></i>
+                            마찰력
+                        </div>
+                        <div id="sensory-loss" class="factor">
+                            <i class="fas fa-fingerprint"></i>
+                            감각 저하
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <h2>2단계 욕창 관리</h2>
+            <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdUEsqn%2FbtqTwX4Syiz%2FiFpgfz5QhEjbYbWcAFdnm1%2Fimg.png" class="wound-image" alt="2단계 욕창">
+            
+            <div class="education-content">
+                <div class="education-item">
+                    <h3><i class="fas fa-info-circle"></i> 욕창이란?</h3>
+                    <p>지속적인 압력이나 마찰로 인해 피부와 기저 조직이 손상되는 상태입니다. 주로 뼈 돌출 부위(엉덩이, 발뒤꿈치, 등)에서 발생합니다.</p>
+                </div>
+                <div class="education-item">
+                    <h3><i class="fas fa-exclamation-triangle"></i> 2단계 욕창의 특징</h3>
+                    <ul>
+                        <li>진피(dermis)까지 손상이 진행된 상태</li>
+                        <li>얇은 궤양이 발생하며, 붉거나 분홍색의 창상이 나타남</li>
+                        <li>물집이 생기거나 표피가 벗겨질 수 있음</li>
+                        <li>감염 위험이 있음</li>
+                    </ul>
+                </div>
+                <div class="education-item">
+                    <h3><i class="fas fa-question-circle"></i> 발생 원인</h3>
+                    <ul>
+                        <li><strong>압력:</strong> 장시간 같은 자세로 앉거나 누워 있을 때 혈류 차단</li>
+                        <li><strong>마찰:</strong> 피부가 침대나 휠체어와 같은 표면과 반복적으로 마찰</li>
+                        <li><strong>전단력:</strong> 몸이 미끄러질 때 피부와 뼈가 다른 방향으로 움직임</li>
+                    </ul>
+                </div>
+                <div class="education-item">
+                    <h3><i class="fas fa-stethoscope"></i> 증상 및 진단</h3>
+                    <p>붉은 반점, 통증을 동반한 작은 물집이나 궤양이 생깁니다. 시각적 검사와 환자 문진을 통해 진단하며, 필요시 전문 의료진의 검진이 필요합니다.</p>
+                </div>
+                <div class="education-item">
+                    <h3><i class="fas fa-hand-holding-medical"></i> 관리 방법</h3>
+                    <ul>
+                        <li><strong>상처 관리:</strong> 깨끗한 거즈와 생리식염수로 상처 부위를 청결하게 유지
+<li><strong>보호:</strong> 특수 패드나 쿠션을 사용하여 압력을 분산</li>
+                        <li><strong>영양 관리:</strong> 단백질과 비타민이 풍부한 식사로 피부 재생 촉진</li>
+                        <li><strong>체위 변경:</strong> 정기적으로 자세를 변경하여 압력을 분산</li>
+                        <li><strong>의료적 처치:</strong> 감염이 의심되면 항생제 치료가 필요할 수 있음</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <h2>
+                추가 교육 자료
+                <i class="fas fa-chevron-right" style="font-size: 16px; color: #4facfe;"></i>
+            </h2>
+            <div class="additional-content">
+                <div class="content-card">
+                    <img src="https://example.com/pressure-ulcer-stages.jpg" alt="욕창의 병태생리">
+                    <div class="content-card-text">
+                        <h3>욕창의 병태생리</h3>
+                        <p>욕창 발생 메커니즘과 조직 손상 과정</p>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <img src="https://example.com/nutrition-management.jpg" alt="영양 관리의 중요성">
+                    <div class="content-card-text">
+                        <h3>영양 관리의 중요성</h3>
+                        <p>적절한 영양 섭취가 욕창 예방과 치유에 미치는 영향</p>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <img src="https://example.com/pressure-relief-techniques.jpg" alt="압력 완화 기술">
+                    <div class="content-card-text">
+                        <h3>압력 완화 기술</h3>
+                        <p>체위 변경 방법과 압력 완화 기구 사용법</p>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <img src="https://example.com/skin-care-methods.jpg" alt="피부 관리 방법">
+                    <div class="content-card-text">
+                        <h3>피부 관리 방법</h3>
+                        <p>피부 건강 유지를 위한 일상적인 관리 방법</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="close-button" onclick="goToMainPage()">
+        <i class="fas fa-times"></i>
+    </button>
+
+    <script>
+        function goToMainPage() {
+            window.location.href = 'index.html';
+        }
+
+        function flipHeader() {
+            document.querySelector('.header').classList.toggle('flipped');
+        }
+
+        let lastScrollTop = 0;
+        const closeButton = document.querySelector('.close-button');
+        const header = document.getElementById('header');
+        const contentSection = document.querySelector('.content-section');
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            let contentSectionTop = contentSection.getBoundingClientRect().top;
+
+            if (scrollTop > lastScrollTop) {
+                closeButton.style.opacity = '0';
+                closeButton.style.transform = 'translateX(-50%) scale(0.9)';
+                
+                // 2단계 욕창 관리 섹션이 상단에 가까워지면 헤더 흐리게 하기
+                if (contentSectionTop < window.innerHeight / 2) {
+                    let opacity = 1 - (window.innerHeight / 2 - contentSectionTop) / (window.innerHeight / 2);
+                    header.style.opacity = opacity > 0 ? opacity : 0;
+                }
+            } else {
+                closeButton.style.opacity = '1';
+                closeButton.style.transform = 'translateX(-50%) scale(1)';
+                
+                // 스크롤을 올리면 헤더 다시 선명하게
+                header.style.opacity = '1';
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }, false);
+
+        // 이미지 로드 에러 처리
+        document.querySelectorAll('img').forEach(img => {
+            img.onerror = function() {
+                this.src = 'https://via.placeholder.com/300x200?text=Image+Not+Found';
+            }
+        });
+    </script>
+</body>
+</html>
