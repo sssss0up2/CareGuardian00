@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CareGuardian - Voice Assistant</title>
+    <title>CareGuardian - 욕창 스마트 관리</title>
     <style>
         * {
             box-sizing: border-box;
@@ -12,8 +12,8 @@
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f2f2f6;
-            color: #333;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #FFFFFF;
             line-height: 1.6;
             min-height: 100vh;
             display: flex;
@@ -27,22 +27,24 @@
             padding: 20px;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
-        .voice-assistant {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
-            color: white;
-            text-align: center;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: #FFFFFF;
+            font-size: 24px;
+            cursor: pointer;
         }
-        .voice-header {
+        .voice-assistant-header {
             font-size: 24px;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin: 40px 0 20px;
+            text-align: center;
+            color: #FFFFFF;
         }
         .voice-animation {
             width: 200px;
@@ -54,7 +56,7 @@
         }
         .voice-bar {
             width: 10px;
-            background-color: white;
+            background-color: #FFFFFF;
             border-radius: 5px;
             animation: voiceWave 0.5s infinite ease-in-out alternate;
         }
@@ -66,88 +68,156 @@
         .voice-bar:nth-child(3) { animation-delay: 0.2s; }
         .voice-bar:nth-child(4) { animation-delay: 0.3s; }
         .voice-bar:nth-child(5) { animation-delay: 0.4s; }
-        .voice-input {
-            font-size: 18px;
+        .common-questions {
             margin-bottom: 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 10px;
         }
-        .voice-result {
+        .question-card {
+            position: relative;
+            display: inline-block;
             background-color: rgba(255, 255, 255, 0.2);
             border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
-            text-align: left;
+            padding: 15px;
+            margin-right: 10px;
+            width: 200px;
+            height: 200px;
+            vertical-align: top;
         }
-        .voice-result h3 {
-            font-size: 18px;
+        .question-card h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #FFFFFF;
+        }
+        .question-card p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .question-card .icon {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: #FFFFFF;
+        }
+        .recent-queries {
+            margin-top: 20px;
+        }
+        .recent-queries-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 10px;
         }
-        .voice-result p {
-            font-size: 16px;
+        .recent-queries h3 {
+            font-size: 18px;
+            color: #FFFFFF;
+        }
+        .expand-arrow {
+            color: #FFFFFF;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .recent-query {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #FFFFFF;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .input-methods {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
         }
         .voice-button {
-            width: 60px;
-            height: 60px;
-            background-color: white;
+            width: 70px;
+            height: 70px;
             border: none;
             border-radius: 50%;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            background-color: #FFFFFF;
             color: #4facfe;
             font-size: 30px;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 30px auto;
+            margin: 0 20px;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.3);
         }
-        .common-questions {
-            margin-top: 20px;
-        }
-        .common-questions h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-        .question-button {
-            background-color: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 20px;
-            padding: 10px 15px;
-            margin: 5px;
-            color: white;
-            font-size: 14px;
+        .input-icon {
+            color: #FFFFFF;
+            font-size: 24px;
+            margin: 0 15px;
             cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .question-button:hover {
-            background-color: rgba(255, 255, 255, 0.3);
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <div class="voice-assistant">
-            <h2 class="voice-header">음성 도우미</h2>
-            <div class="voice-animation">
-                <div class="voice-bar"></div>
-                <div class="voice-bar"></div>
-                <div class="voice-bar"></div>
-                <div class="voice-bar"></div>
-                <div class="voice-bar"></div>
+        <button class="back-button" onclick="goBack()">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <h1 class="voice-assistant-header">무엇을 도와드릴까요?</h1>
+        <div class="voice-animation">
+            <div class="voice-bar"></div>
+            <div class="voice-bar"></div>
+            <div class="voice-bar"></div>
+            <div class="voice-bar"></div>
+            <div class="voice-bar"></div>
+        </div>
+        <div class="common-questions">
+            <div class="question-card">
+                <h3>체위변경 시간을<br>알려주세요</h3>
+                <p>다음 체위변경 시간과<br>방법 안내</p>
+                <i class="fas fa-clock icon"></i>
             </div>
-            <p class="voice-input">"체위변경 시간 알려주세요"</p>
-            <div class="voice-result">
-                <h3>답변:</h3>
-                <p>김환자님의 마지막 체위변경 시간은 2시간 전입니다. 지금 체위변경을 하는 것이 좋겠습니다.</p>
+            <div class="question-card">
+                <h3>현재 욕창 위험도는<br>어떤가요?</h3>
+                <p>욕창 위험 수준 및<br>예방 조치 설명</p>
+                <i class="fas fa-search icon"></i>
             </div>
-            <button class="voice-button"><i class="fas fa-microphone"></i></button>
-            <div class="common-questions">
-                <h3>자주 묻는 질문</h3>
-                <button class="question-button">체위변경 시간 알려줘</button>
-                <button class="question-button">오늘의 관리 상태는?</button>
-                <button class="question-button">현재 욕창 위험 수준</button>
-                <button class="question-button">다음 약 복용 시간</button>
+            <div class="question-card">
+                <h3>오늘의 욕창 관리<br>일정을 알려주세요</h3>
+                <p>체위변경, 피부 관찰,<br>영양 관리 등 일정 안내</p>
+                <i class="fas fa-calendar-alt icon"></i>
             </div>
         </div>
+        <div class="recent-queries">
+            <div class="recent-queries-header">
+                <h3>최근</h3>
+                <span class="expand-arrow"><i class="fas fa-chevron-right"></i></span>
+            </div>
+            <div class="recent-query">
+                <i class="fas fa-history"></i>
+                마지막 체위변경 시간이 언제인가요?
+            </div>
+            <div class="recent-query">
+                <i class="fas fa-history"></i>
+                욕창 예방을 위한 올바른 자세는 무엇인가요?
+            </div>
+            <div class="recent-query">
+                <i class="fas fa-history"></i>
+                욕창 관리에 좋은 영양소는 무엇인가요?
+            </div>
+        </div>
+        <div class="input-methods">
+            <i class="fas fa-keyboard input-icon"></i>
+            <button class="voice-button"><i class="fas fa-microphone"></i></button>
+            <i class="fas fa-camera input-icon"></i>
+        </div>
     </div>
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
 </body>
 </html>
